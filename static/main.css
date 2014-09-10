@@ -1,0 +1,14 @@
+/*.comment {
+    opacity: 0;
+}*/
+
+.comments-enter {
+    color: blue;
+    opacity: 1;
+    transition: opacity .5s ease-in;
+}
+
+.comments-enter.comments-enter-active {
+    color: red;
+    opacity: 0.01;
+}

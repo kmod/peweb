@@ -10,8 +10,6 @@ app = flask.Flask(__name__)
 
 request = flask.request
 
-_main_html = open("templates/main.html").read()
-
 @app.route("/")
 def index():
     return flask.redirect(flask.url_for('static', filename="main.html"))
@@ -26,7 +24,7 @@ def shelves():
             }
     return json.dumps(shelves)
 
-cur_comments = [{'author': "Peter Hunt", 'text': "This is one comment"}, {'author': "Jordan Walke", 'text': "This is *another* comment"}]
+cur_comments = [{'author': "Peter Hunt", 'text': "This is one comment", "key":1}, {'author': "Jordan Walke", 'text': "This is *another* comment", "key":2}]
 
 @app.route("/comments.json", methods=["GET", "POST"])
 def comments():

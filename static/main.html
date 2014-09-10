@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
     <head>
-        <script src="/static/react.js"></script>
+        <link rel="stylesheet" type="text/css" href="main.css" />
+        <script src="/static/react-with-addons.js"></script>
         <script src="/static/jquery-2.1.1.js"></script>
         <script src="/static/JSXTransformer.js"></script>
     </head>
@@ -9,11 +10,6 @@
         <div id="content"></div>
         <script type="text/jsx">
             /** @jsx React.DOM */
-            var data = [
-            {author: "Pete Hunt", text: "This is one comment"},
-            {author: "Jordan Walke", text: "This is *another* comment"}
-            ];
-
             var CommentBox = React.createClass({
                 getInitialState: function() {
                     return {data: []};
@@ -79,14 +75,16 @@
                 render: function() {
                     var commentNodes = this.props.data.map(function (comment) {
                         return (
-                        <Comment author={comment.author}>
+                        <Comment author={comment.author} key={comment.key}>
                         {comment.text}
                         </Comment>
                         );
                     });
                     return (
                     <div className="commentList">
-                        {commentNodes}
+                        <React.addons.CSSTransitionGroup transitionName="comments">
+                            {commentNodes}
+                        </React.addons.CSSTransitionGroup>
                     </div>
                     );
                 }
