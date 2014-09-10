@@ -3,12 +3,12 @@
 }*/
 
 .comments-enter {
-    color: blue;
-    opacity: 1;
-    transition: opacity .5s ease-in;
+    opacity: 0.99;
+    background-color: #ffffbb;
+    transition: background 1s 1s;
 }
 
 .comments-enter.comments-enter-active {
-    color: red;
-    opacity: 0.01;
+    background-color: #ffffff;
+    opacity: 1;
 }
