@@ -1,9 +1,9 @@
 <!doctype html>
 <html>
     <head>
-        <script src="static/react.js"></script>
-        <script src="static/jquery-2.1.1.js"></script>
-        <script src="static/JSXTransformer.js"></script>
+        <script src="/static/react.js"></script>
+        <script src="/static/jquery-2.1.1.js"></script>
+        <script src="/static/JSXTransformer.js"></script>
     </head>
     <body>
         <div id="content"></div>
@@ -116,7 +116,7 @@
                 }
             });
             React.renderComponent(
-            <CommentBox url="comments.json" pollInterval={2000}/>,
+            <CommentBox url="/comments.json" pollInterval={2000}/>,
             document.getElementById('content')
             );
         </script>

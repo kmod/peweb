@@ -5,12 +5,16 @@ try:
 except ImportError:
     import json
 
-from flask import Flask, render_template, request
-app = Flask(__name__)
+import flask
+app = flask.Flask(__name__)
+
+request = flask.request
+
+_main_html = open("templates/main.html").read()
 
 @app.route("/")
 def index():
-    return render_template("main.html")
+    return flask.redirect(flask.url_for('static', filename="main.html"))
 
 @app.route("/shelves")
 def shelves():
