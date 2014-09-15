@@ -6,6 +6,7 @@
     opacity: 0.99;
     background-color: #ffffbb;
     transition: background 1s 1s;
+    -webkit-transition: background 1s 1s;
 }
 
 .comments-enter.comments-enter-active {
