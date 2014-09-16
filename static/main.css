@@ -5,12 +5,26 @@
 }
 
 .shelf_header {
+    padding: 10px 10px;
     border: 1px solid black;
 }
 .shelf_header:hover {
     background-color: #ffffbb;
 }
 
+.shelf_name {
+    font-size: 150%;
+    font-weight: bold;
+}
+
 .shelf_list {
     width: 400px;
+}
+
+.delete_shelf {
+    float:right;
+}
+
+.createShelfForm {
+    margin-top: 10px;
 }

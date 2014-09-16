@@ -32,18 +32,61 @@
                     //setInterval(this.loadShelves, this.props.pollInterval);
                 },
 
+                handleShelfCreate: function(shelf, cb) {
+                    var shelves = this.state.shelves;
+                    //var new_shelves = shelves.concat([shelf]);
+                    //this.setState({shelves: new_shelves});
+                    var url = "/create_shelf";
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST',
+                        data: shelf,
+                        success: function(shelves) {
+                            this.setState({shelves: shelves});
+                            cb(true);
+                        }.bind(this),
+                        error: function(xhr, status, err) {
+                            this.setState({shelves: shelves});
+                            console.error(url, status, err.toString());
+                            cb(false);
+                        }.bind(this)
+                    });
+                },
+
+                handleShelfDelete: function(shelf) {
+                    var shelves = this.state.shelves;
+                    //var new_shelves = shelves; // remove shelf
+                    //this.setState({shelves: new_shelves});
+                    var url = "/delete_shelf";
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {shelf_id: shelf.id},
+                        success: function(shelves) {
+                            this.setState({shelves: shelves});
+                        }.bind(this),
+                        error: function(xhr, status, err) {
+                            this.setState({shelves: shelves});
+                            console.error(url, status, err.toString());
+                        }.bind(this)
+                    });
+                },
+
                 render: function() {
                     var shelves = this.state.shelves.map(function (shelf) {
                         return (
-                        <ShelfHeader data={shelf} key={shelf.id} />
+                        <ShelfHeader data={shelf} key={shelf.id} handleShelfDelete={this.handleShelfDelete} />
                         );
-                    });
+                    }.bind(this));
 
                     return (
                     <div>
                         <div className="shelf_list">
                             <h2>Your shelves:</h2>
                             {shelves}
+                            <CreateShelfForm onCreateShelf={this.handleShelfCreate} />
                         </div>
                     </div>
                     );
@@ -51,11 +94,52 @@
             });
 
             var ShelfHeader = React.createClass({
+                handleDelete: function(e) {
+                    e.preventDefault();
+
+                    this.props.handleShelfDelete(this.props.data);
+                },
+
                 render: function() {
                     return (
                     <div className="shelf_header">
-                        <h4>{this.props.data.name}</h4>
+                        <span className="shelf_name">{this.props.data.name}</span>
+
+                        <form className="delete_shelf" onSubmit={this.handleDelete}>
+                            <input type="submit" value="Delete shelf" />
+                        </form>
                     </div>
+                    )
+                },
+            });
+
+            var CreateShelfForm = React.createClass({
+                handleSubmit: function(e) {
+                    e.preventDefault();
+
+                    var name_node = this.refs.name.getDOMNode();
+                    var name = name_node.value.trim();
+                    if (!name) {
+                        return;
+                    }
+
+                    var cb = function(success) {
+                        name_node.disabled = false;
+                        if (success)
+                            name_node.value = '';
+                    };
+
+                    name_node.disabled = true;
+                    this.props.onCreateShelf({name: name}, cb);
+                    return;
+                },
+                render: function() {
+                    return (
+                    <form className="createShelfForm" onSubmit={this.handleSubmit}>
+                        Create shelf:
+                        <input type="text" placeholder="Shelf name" ref="name" />
+                        <input type="submit" value="Create" />
+                    </form>
                     )
                 },
             });
