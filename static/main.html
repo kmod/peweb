@@ -12,7 +12,7 @@
             /** @jsx React.DOM */
             var Library = React.createClass({
                 getInitialState: function() {
-                    return {shelves: []};
+                    return {shelves: [], selectedShelf: null};
                 },
                 loadShelves: function() {
                     var url = "/shelves";
@@ -74,12 +74,24 @@
                     });
                 },
 
+                handleShelfClick: function(shelf) {
+                    this.state.selectedShelf = shelf;
+                    this.setState(this.state)
+                },
+
                 render: function() {
                     var shelves = this.state.shelves.map(function (shelf) {
                         return (
-                        <ShelfHeader data={shelf} key={shelf.id} handleShelfDelete={this.handleShelfDelete} />
+                        <ShelfHeader data={shelf} key={shelf.id} handleShelfDelete={this.handleShelfDelete} handleShelfClick={this.handleShelfClick} />
                         );
                     }.bind(this));
+
+                    var view = "";
+                    if (this.state.selectedShelf)
+                    view = (
+                    <ShelfView shelf={this.state.selectedShelf} />
+                    );
+
 
                     return (
                     <div>
@@ -88,9 +100,25 @@
                             {shelves}
                             <CreateShelfForm onCreateShelf={this.handleShelfCreate} />
                         </div>
+
+                        {view}
                     </div>
                     );
                 },
+            });
+
+            var ShelfView = React.createClass({
+                getInitialState: function() {
+                    return {shelf: null};
+                },
+
+                render: function() {
+                    return (
+                    <div className="shelfview">
+                        <h2> {this.props.shelf.name} </h2>
+                    </div>
+                    );
+                }
             });
 
             var ShelfHeader = React.createClass({
@@ -100,9 +128,15 @@
                     this.props.handleShelfDelete(this.props.data);
                 },
 
+                handleShelfClick: function(e) {
+                    e.preventDefault();
+
+                    this.props.handleShelfClick(this.props.data);
+                },
+
                 render: function() {
                     return (
-                    <div className="shelf_header">
+                    <div className="shelf_header" onClick={this.handleShelfClick}>
                         <span className="shelf_name">{this.props.data.name}</span>
 
                         <form className="delete_shelf" onSubmit={this.handleDelete}>

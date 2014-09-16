@@ -1,5 +1,5 @@
 #content {
-    width: 800px;
+    width: 1205px;
     margin: 0 auto;
     margin-top: 40px;
 }
@@ -19,6 +19,7 @@
 
 .shelf_list {
     width: 400px;
+    float: left;
 }
 
 .delete_shelf {
@@ -27,4 +28,11 @@
 
 .createShelfForm {
     margin-top: 10px;
+}
+
+.shelfview {
+    border: 1px solid black;
+    width: 800px;
+    height: 600px;
+    float: left;
 }
