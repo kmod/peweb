@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="/static/main.css" />
+        <script src="/static/react-with-addons.js"></script>
+        <script src="/static/jquery-2.1.1.js"></script>
+        <script src="/static/JSXTransformer.js"></script>
+    </head>
+    <body>
+        <div id="content"></div>
+        <script type="text/jsx">
+            /** @jsx React.DOM */
+            var Library = React.createClass({
+                getInitialState: function() {
+                    return {shelves: []};
+                },
+                loadShelves: function() {
+                    var url = "/shelves";
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        success: function(shelves) {
+                            this.setState({shelves: shelves});
+                        }.bind(this),
+                        error: function(xhr, status, err) {
+                            console.error(url, status, err.toString());
+                        }.bind(this)
+                    });
+                },
+                componentDidMount: function() {
+                    this.loadShelves();
+                    //setInterval(this.loadShelves, this.props.pollInterval);
+                },
+
+                render: function() {
+                    var shelves = this.state.shelves.map(function (shelf) {
+                        return (
+                        <ShelfHeader data={shelf} key={shelf.id} />
+                        );
+                    });
+
+                    return (
+                    <div>
+                        <div className="shelf_list">
+                            <h2>Your shelves:</h2>
+                            {shelves}
+                        </div>
+                    </div>
+                    );
+                },
+            });
+
+            var ShelfHeader = React.createClass({
+                render: function() {
+                    return (
+                    <div className="shelf_header">
+                        <h4>{this.props.data.name}</h4>
+                    </div>
+                    )
+                },
+            });
+
+            React.renderComponent(
+            <Library />,
+            document.getElementById('content')
+            );
+        </script>
+    </body>
+</html>
+

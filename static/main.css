@@ -1,0 +1,16 @@
+#content {
+    width: 800px;
+    margin: 0 auto;
+    margin-top: 40px;
+}
+
+.shelf_header {
+    border: 1px solid black;
+}
+.shelf_header:hover {
+    background-color: #ffffbb;
+}
+
+.shelf_list {
+    width: 400px;
+}
