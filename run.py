@@ -14,7 +14,7 @@ import model
 request = flask.request
 
 def login_required(f):
-    u = model.User()
+    u = model.User(id=1)
 
     @functools.wraps(f)
     def inner(*args, **kw):
@@ -31,10 +31,8 @@ def index(u):
 @app.route("/shelves")
 @login_required
 def shelves(u):
-    return json.dumps([
-        {'id': 1, 'name': "Test shelf"},
-        {'id': 2, 'name': "Test shelf 2"},
-            ])
+    shelves = u.getAllShelves()
+    return json.dumps([s.serialize() for s in shelves])
 
 @app.route("/login")
 def login():
