@@ -70,9 +70,23 @@ def delete_shelf(u):
 @endpoint("/shelf")
 def shelf_contents(u):
     d = request.args.to_dict()
-    id = d.pop('id')
+    shelf_id = d.pop('id')
     assert not d
-    return json.dumps(model.Shelf.loadForUser(u, id))
+
+    assert model.Shelf.authorizedForUser(u, shelf_id)
+    return json.dumps([p.serialize() for p in model.Shelf.loadForUser(u, shelf_id)])
+
+@endpoint("/add_paper", methods=["POST"])
+def add_paper(u):
+    d = request.form.to_dict()
+    shelf_id = d.pop("shelf_id")
+    paper_data = d.pop("data")
+    assert not d
+
+    assert model.Shelf.authorizedForUser(u, shelf_id)
+    p = model.Paper.create(paper_data)
+    Shelf.addPaper(p)
+    return json.dumps([p.serialize() for p in model.Shelf.loadForUser(u, shelf_id)])
 
 
 if __name__ == "__main__":

@@ -59,7 +59,25 @@
                             cb(true);
                         }.bind(this),
                         error: function(xhr, status, err) {
-                            this.setState({shelves: shelves});
+                            //this.setState({shelves: shelves});
+                            console.error(url, status, err.toString());
+                            cb(false);
+                        }.bind(this)
+                    });
+                },
+
+                onAddPaper: function(shelf_id, data, cb) {
+                    var url = "/add_paper";
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        type: 'POST',
+                        data: {shelf_id:shelf_id, data:data},
+                        success: function(papers) {
+                            this.setState({selectedContents: papers});
+                            cb(true);
+                        }.bind(this),
+                        error: function(xhr, status, err) {
                             console.error(url, status, err.toString());
                             cb(false);
                         }.bind(this)
@@ -68,8 +86,6 @@
 
                 handleShelfDelete: function(shelf) {
                     var shelves = this.state.shelves;
-                    //var new_shelves = shelves; // remove shelf
-                    //this.setState({shelves: new_shelves});
                     var url = "/delete_shelf";
                     $.ajax({
                         url: url,
@@ -77,7 +93,7 @@
                         type: 'POST',
                         data: {shelf_id: shelf.id},
                         success: function(shelves) {
-                            this.setState({shelves: shelves});
+                            this.setState({shelves: shelves, selectedShelf: null});
                         }.bind(this),
                         error: function(xhr, status, err) {
                             this.setState({shelves: shelves});
@@ -119,7 +135,7 @@
                     var view = "";
                     if (this.state.selectedShelf)
                     view = (
-                    <ShelfView shelf={this.state.selectedShelf} contents={this.state.selectedContents} />
+                    <ShelfView shelf={this.state.selectedShelf} contents={this.state.selectedContents} onAddPaper={this.onAddPaper} />
                     );
 
 
@@ -157,11 +173,35 @@
             var AddPaperForm = React.createClass({
                 handleSubmit: function(e) {
                     e.preventDefault();
+
+                    var name_node = this.refs.name.getDOMNode();
+                    var name = name_node.value.trim();
+                    var url_node = this.refs.url.getDOMNode();
+                    var url = url_node.value.trim();
+                    if (!name || !url) {
+                        return;
+                    }
+
+                    var cb = function(success) {
+                        name_node.disabled = false;
+                        url_node.disabled = false;
+                        if (success) {
+                            name_node.value = '';
+                            url_node.value = '';
+                        }
+                    };
+
+                    name_node.disabled = true;
+                    url_node.disabled = true;
+                    this.props.onAddPaper({name: name, url:url}, cb);
+                    return;
                 },
 
                 render: function() {
                     return (
                     <form className="add_shelf_form" onSubmit={this.handleSubmit}>
+                        <input type="text" placeholder="Paper name" ref="name" />
+                        <input type="text" placeholder="url" ref="url" />
                         <input type="submit" value="Add paper" />
                     </form>
                     )
@@ -180,7 +220,7 @@
                     <div className="shelf_view">
                         <h2> {this.props.shelf.name} </h2>
                         {shelves}
-                        <AddPaperForm shelf={this.props.shelf} />
+                        <AddPaperForm shelf={this.props.shelf} onAddPaper={function(data, cb) { this.props.onAddPaper(this.props.shelf.id, data, cb); }.bind(this)} />
                     </div>
                     );
                 },
@@ -205,7 +245,8 @@
                         <span className="shelf_name">{this.props.shelf.name}</span>
 
                         <form className="delete_shelf" onSubmit={this.handleDelete}>
-                            <input type="submit" value="Delete shelf" />
+                            <input type="submit" value="Delete shelf"
+                            onClick={function(e) {e.stopPropagation();}}/>
                         </form>
                     </div>
                     )

@@ -8,7 +8,8 @@ from sqlalchemy import (
         DateTime,
         Float,
         ForeignKey,
-        and_
+        and_,
+        Text,
         )
 from sqlalchemy.orm import mapper, relationship, sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
@@ -38,7 +39,8 @@ class Shelf(Base):
         shelf_id = int(shelf_id)
         allowed = bool(session.query(UserShelf).filter(UserShelf.shelf_id==shelf_id and UserShelf.user_id==u.id).all())
         assert allowed
-        return [dict(id=shelf_id, name="paper %d" % shelf_id, url="http://www.vision.caltech.edu/publications/DollarEtAlECCV08mcl.pdf")]
+        return session.query(Paper).join(ShelfPaper).filter(ShelfPaper.shelf_id==shelf_id)
+        # return [dict(id=shelf_id, name="paper %d" % shelf_id, url="http://www.vision.caltech.edu/publications/DollarEtAlECCV08mcl.pdf")]
 
 class UserShelf(Base):
     __tablename__ = "usershelves"
@@ -58,6 +60,20 @@ class User(Base):
         session.add(s)
         session.flush()
         session.add(UserShelf(user_id=self.id, shelf_id=s.id))
+
+class Paper(Base):
+    __tablename__ = "papers"
+    id = Column(Integer, primary_key=True)
+    name = Column(Unicode(255), nullable=False)
+    url = Column(Text, nullable=False)
+
+    def __init__(self, name):
+        self.name = name
+
+class ShelfPaper(Base):
+    __tablename__ = "shelfpaper"
+    shelf_id = Column(Integer, ForeignKey("shelves.id"), primary_key=True)
+    paper_id = Column(Integer, ForeignKey("papers.id"), primary_key=True)
 
 engine = create_engine("sqlite:///data.sqlite3")
 engine.echo = True
