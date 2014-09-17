@@ -12,7 +12,7 @@
             /** @jsx React.DOM */
             var Library = React.createClass({
                 getInitialState: function() {
-                    return {shelves: [], selectedShelf: null};
+                    return {shelves: [], selectedShelf: null, selectedContents: []};
                 },
                 loadShelves: function() {
                     var url = "/shelves";
@@ -28,7 +28,19 @@
                     });
                 },
                 componentDidMount: function() {
+                    // From http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+                    function getParameterByName(name) {
+                        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+                        var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+                        results = regex.exec(location.search);
+                        return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+                    }
+
                     this.loadShelves();
+
+                    var selected_shelf_id = getParameterByName("shelf");
+                    if (selected_shelf_id)
+                        this.handleShelfClick(selected_shelf_id);
                     //setInterval(this.loadShelves, this.props.pollInterval);
                 },
 
@@ -74,22 +86,40 @@
                     });
                 },
 
-                handleShelfClick: function(shelf) {
-                    this.state.selectedShelf = shelf;
-                    this.setState(this.state)
+                handleShelfClick: function(shelf_id) {
+                    if (this.state.selectedShelf && shelf_id === this.state.selectedShelf.id)
+                        return;
+
+                    var url = "/shelf";
+                    $.ajax({
+                        url: url,
+                        dataType: 'json',
+                        data: {id: shelf_id},
+                        success: function(papers) {
+                            window.history.pushState({}, "", "?shelf=" + shelf_id);
+                            for (var idx in this.state.shelves) {
+                                var shelf = this.state.shelves[idx];
+                                if (shelf.id == shelf_id)
+                                    this.setState({selectedShelf: shelf, selectedContents: papers});
+                            }
+                        }.bind(this),
+                        error: function(xhr, status, err) {
+                            console.error(url, status, err.toString());
+                        }.bind(this)
+                    });
                 },
 
                 render: function() {
                     var shelves = this.state.shelves.map(function (shelf) {
                         return (
-                        <ShelfHeader data={shelf} key={shelf.id} handleShelfDelete={this.handleShelfDelete} handleShelfClick={this.handleShelfClick} />
+                        <ShelfHeader shelf={shelf} key={shelf.id} handleShelfDelete={this.handleShelfDelete} handleShelfClick={this.handleShelfClick} />
                         );
                     }.bind(this));
 
                     var view = "";
                     if (this.state.selectedShelf)
                     view = (
-                    <ShelfView shelf={this.state.selectedShelf} />
+                    <ShelfView shelf={this.state.selectedShelf} contents={this.state.selectedContents} />
                     );
 
 
@@ -107,37 +137,72 @@
                 },
             });
 
-            var ShelfView = React.createClass({
-                getInitialState: function() {
-                    return {shelf: null};
+            var PaperView = React.createClass({
+                handlePaperClick: function(e) {
+                    e.preventDefault();
+
+                    this.props.handlePaperClick(this.props.paper.id);
                 },
 
                 render: function() {
                     return (
-                    <div className="shelfview">
-                        <h2> {this.props.shelf.name} </h2>
+                    <div className="paper_view" onClick={this.handlePaperClick}>
+                        <h3 style={{display:"inline-block", "margin-left":"10px", "margin-right":"20px"}}> {this.props.paper.name} </h3>
+                        <a href={this.props.paper.url}>Link</a>
                     </div>
                     );
-                }
+                },
+            });
+
+            var AddPaperForm = React.createClass({
+                handleSubmit: function(e) {
+                    e.preventDefault();
+                },
+
+                render: function() {
+                    return (
+                    <form className="add_shelf_form" onSubmit={this.handleSubmit}>
+                        <input type="submit" value="Add paper" />
+                    </form>
+                    )
+                },
+            });
+
+            var ShelfView = React.createClass({
+                render: function() {
+                    var shelves = this.props.contents.map(function (paper) {
+                        return (
+                        <PaperView paper={paper} key={paper.id} />
+                        );
+                    }.bind(this));
+
+                    return (
+                    <div className="shelf_view">
+                        <h2> {this.props.shelf.name} </h2>
+                        {shelves}
+                        <AddPaperForm shelf={this.props.shelf} />
+                    </div>
+                    );
+                },
             });
 
             var ShelfHeader = React.createClass({
                 handleDelete: function(e) {
                     e.preventDefault();
 
-                    this.props.handleShelfDelete(this.props.data);
+                    this.props.handleShelfDelete(this.props.shelf);
                 },
 
                 handleShelfClick: function(e) {
                     e.preventDefault();
 
-                    this.props.handleShelfClick(this.props.data);
+                    this.props.handleShelfClick(this.props.shelf.id);
                 },
 
                 render: function() {
                     return (
                     <div className="shelf_header" onClick={this.handleShelfClick}>
-                        <span className="shelf_name">{this.props.data.name}</span>
+                        <span className="shelf_name">{this.props.shelf.name}</span>
 
                         <form className="delete_shelf" onSubmit={this.handleDelete}>
                             <input type="submit" value="Delete shelf" />

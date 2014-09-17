@@ -30,9 +30,16 @@
     margin-top: 10px;
 }
 
-.shelfview {
+.shelf_view {
     border: 1px solid black;
     width: 800px;
     height: 600px;
     float: left;
+}
+
+.paper_view {
+    border: 1px solid black;
+}
+.paper_view:hover {
+    background-color: #ffffbb;
 }

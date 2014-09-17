@@ -67,6 +67,13 @@ def delete_shelf(u):
 
     return _user_shelves(u)
 
+@endpoint("/shelf")
+def shelf_contents(u):
+    d = request.args.to_dict()
+    id = d.pop('id')
+    assert not d
+    return json.dumps(model.Shelf.loadForUser(u, id))
+
 
 if __name__ == "__main__":
     app.debug = True

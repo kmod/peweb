@@ -29,8 +29,16 @@ class Shelf(Base):
 
     @staticmethod
     def deleteShelf(shelf_id):
+        shelf_id = int(shelf_id)
         session.query(Shelf).filter(Shelf.id==shelf_id).delete()
         session.query(UserShelf).filter(UserShelf.shelf_id==shelf_id).delete()
+
+    @staticmethod
+    def loadForUser(u, shelf_id):
+        shelf_id = int(shelf_id)
+        allowed = bool(session.query(UserShelf).filter(UserShelf.shelf_id==shelf_id and UserShelf.user_id==u.id).all())
+        assert allowed
+        return [dict(id=shelf_id, name="paper %d" % shelf_id, url="http://www.vision.caltech.edu/publications/DollarEtAlECCV08mcl.pdf")]
 
 class UserShelf(Base):
     __tablename__ = "usershelves"
